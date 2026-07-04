@@ -6,9 +6,10 @@
 
 ## Changelog
 
-| Date     | Author         | Change Description          |
-| -------- | -------------- | --------------------------- |
-| 7/3/2026 | Talia Sirianni | Published the first version |
+| Date     | Author         | Change Description                                                                                 |
+| -------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| 7/3/2026 | Talia Sirianni | Published the first version                                                                        |
+| 7/4/2026 | Talia Sirianni | Added criticism received by family when I first pitched this project + plans to address each point |
 
 ## Problem
 
@@ -80,3 +81,11 @@ USDA FoodKeeper dataset (400+ items, shelf life by storage method), bundled loca
 - Live web demo link
 - 30-sec demo GIF in README
 - DESIGN.md: show the evolution of this project's design
+
+## Criticism of Concept + Potential Solutions
+
+- **No one will want to manually update the app to map everything they have in their kitchen. Manual data entry is an app killer**
+  - **Solution:** Present the app as a way to track "tonight's groceries" or "my 5 most at risk perishables"
+
+- **Not everyone will want to use an app to solve this problem. Lot's of people sniff their food/manually check the date and call it a day**
+  - **Solution:** I am living proof that there's an audience for an app solution. The sniff test drives me nuts. I cannot keep dates in my head on top of everything. I acknowledge that my app won't appeal to everyone but there's most certainly an appeal to younger people who are trying to save money and want to avoid wasting their purchases. Target an audience that has frequently lost money due to not eating/drinking their purchases before they expire.
