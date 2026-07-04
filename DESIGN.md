@@ -93,6 +93,8 @@ Consume or discard: both remove the item; distinction logged for v2 waste stats
 
 USDA FoodKeeper dataset (400+ items, shelf life by storage method), bundled locally as JSON. It is offline, no third-party API dependency. The picker pre-fills a suggested expiry date based on the item's storage group.
 
+- https://catalog.data.gov/dataset/fsis-foodkeeper-data
+
 ## Features Not in V1 MVP
 
 - Barcode scanning (barcodes don't encode expiry dates)
