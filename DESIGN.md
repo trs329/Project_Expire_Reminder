@@ -1,6 +1,6 @@
 # Food Expiry Tracker Specifications
 
-**Version:** 1.3
+**Version:** 1.4
 **Author:** Talia Sirianni
 **Created on:** 7/3/2026
 
@@ -12,6 +12,7 @@
 | 7/4/2026 | Talia Sirianni | Added criticism received by family when I first pitched this project + plans to address each point                                                        |
 | 7/4/2026 | Talia Sirianni | Updated the users section with an identified target audience                                                                                              |
 | 7/4/2026 | Talia Sirianni | Rewrote the no-expiration-date flow to use a picker (no fuzzy matching), added date source tracking, added the user flow chart, cleaned up open questions |
+| 7/4/2026 | Talia Sirianni | ER schema plan, resolution log with snapshot fields, delete-logging rule, group-deletion rule (open question 5).                                          |
 
 ## Problem
 
@@ -87,13 +88,52 @@ flowchart TD
 
 ## Item resolution
 
-Consume or discard: both remove the item; distinction logged for v2 waste stats
+Consume, discard, or delete: all remove the item; distinction logged for v2 waste stats (besides delete which gets filtered out of waste stats but is still logged in the system)
 
 ## Data for Suggestions Feature
 
 USDA FoodKeeper dataset (400+ items, shelf life by storage method), bundled locally as JSON. It is offline, no third-party API dependency. The picker pre-fills a suggested expiry date based on the item's storage group.
 
 - https://catalog.data.gov/dataset/fsis-foodkeeper-data
+
+## ER Diagram (Schema Plan)
+
+> For V1, the design will assume I am the sole user using this app on my phone.
+
+**Entities**
+
+- **Items**
+  - item_id
+  - group_id
+  - name
+  - expiration_date
+  - date_source (CHECK that date_source is either "printed", "suggested" or "estimated")
+  - added_at
+  - snoozed_until (nullable for if snooze is never used)
+
+> Note that expiration will be derived (is expiration_date? < today?)
+
+- **FoodGroups**
+  - group_id
+  - name
+  - created_at
+
+> FoodGroups cannot be deleted if they are not empty. Users must resolve all its items first (consume, discard, move, delete)
+
+- **ResolutionLog** // For what happens to added items (consumed or discarded?)
+  - log_id
+  - item_name
+  - group_name
+  - resolution_type (CHECK that resolution_type is either "consumed", "discarded", or "deleted")
+  - resolved_at
+
+> I am opting to use ResolutionLog to follow single responsibility principle and distinguish logs from the current active data that the user is tracking
+
+**Diagram**
+
+```mermaid
+
+```
 
 ## Features Not in V1 MVP
 
@@ -143,3 +183,5 @@ After 2 weeks of daily use, I've logged ≥ 10 items and rescued ≥ 1 item I'd 
    - **Partially resolved:** frame onboarding as "tonight's groceries" or "my 5 most at risk perishables" instead of a full kitchen inventory. The kitchen fills up incrementally as I shop
 4. What are the most useful quick-pick date options and what general storage advice should the tooltips give (ex: what works best for produce vs. meats)?
    - **TBD (Unresolved):** Needs research as of writing this note
+5. Can users delete a food group when items still exist in that food group?
+   - **Resolved:** No. The user must move, consume, discard or delete each item in that food group before it can be deleted.
