@@ -1,6 +1,6 @@
 # Food Expiry Tracker Specifications
 
-**Version**: 1
+**Version**: 1.1
 **Author:**: Talia Sirianni
 **Created on:** 7/3/2026
 
