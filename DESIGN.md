@@ -1,18 +1,20 @@
 # Food Expiry Tracker Specifications
 
-**Version:** 1.4
+**Version:** 1.5
 **Author:** Talia Sirianni
 **Created on:** 7/3/2026
 
 ## Changelog
 
-| Date     | Author         | Change Description                                                                                                                                        |
-| -------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 7/3/2026 | Talia Sirianni | Published the first version                                                                                                                               |
-| 7/4/2026 | Talia Sirianni | Added criticism received by family when I first pitched this project + plans to address each point                                                        |
-| 7/4/2026 | Talia Sirianni | Updated the users section with an identified target audience                                                                                              |
-| 7/4/2026 | Talia Sirianni | Rewrote the no-expiration-date flow to use a picker (no fuzzy matching), added date source tracking, added the user flow chart, cleaned up open questions |
-| 7/4/2026 | Talia Sirianni | ER schema plan, resolution log with snapshot fields, delete-logging rule, group-deletion rule (open question 5).                                          |
+| Date     | Author         | Change Description                                                                                                                                                                  |
+| -------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 7/3/2026 | Talia Sirianni | Published the first version                                                                                                                                                         |
+| 7/4/2026 | Talia Sirianni | Added criticism received by family when I first pitched this project + plans to address each point                                                                                  |
+| 7/4/2026 | Talia Sirianni | Updated the users section with an identified target audience                                                                                                                        |
+| 7/4/2026 | Talia Sirianni | Rewrote the no-expiration-date flow to use a picker (no fuzzy matching), added date source tracking, added the user flow chart, cleaned up open questions                           |
+| 7/4/2026 | Talia Sirianni | ER schema plan, resolution log with snapshot fields, delete-logging rule, group-deletion rule (open question 5)                                                                     |
+| 7/6/2026 | Talia Sirianni | Corrected the ER diagram: removed false RESOLUTIONLOG relationships and enum pseudo-entities, restored snoozed_until, fixed Mermaid field syntax, added the snapshot rationale note |
+| 7/6/2026 | Talia Sirianni | Added open question 6 documenting the foreign keys vs. snapshots decision for ResolutionLog                                                                                         |
 
 ## Problem
 
@@ -76,7 +78,7 @@ flowchart TD
 - Item entry: name + expiry date + group
 - Each item records its date source: `printed`, `suggested`, or `estimated` (cheap to store now, powers V2 insights later)
 - Item list (inventory) should be sorted by soonest-expiring
-- "Expired" status is derived (expiry_date < today), never a stored flag (which would be redundant and fail to sync accurately). Calculation is preferred, automated and reliable
+- "Expired" status is derived (expiration_date < today), never a stored flag (which would be redundant and fail to sync accurately). Calculation is preferred, automated and reliable
 - Expiration View of Inventory: all expired items across groups in one list, showing each item's group
 
 ## Notifications
@@ -111,7 +113,7 @@ USDA FoodKeeper dataset (400+ items, shelf life by storage method), bundled loca
   - added_at
   - snoozed_until (nullable for if snooze is never used)
 
-> Note that expiration will be derived (is expiration_date? < today?)
+> Note that expiration will be derived (is expiration_date < today?)
 
 - **FoodGroups**
   - group_id
@@ -129,11 +131,40 @@ USDA FoodKeeper dataset (400+ items, shelf life by storage method), bundled loca
 
 > I am opting to use ResolutionLog to follow single responsibility principle and distinguish logs from the current active data that the user is tracking
 
-**Diagram**
+**ER Diagram**
 
 ```mermaid
+erDiagram
+    FOODGROUPS ||--o{ ITEMS : contains
 
+    FOODGROUPS {
+        UUID group_id PK
+        string name
+        timestamptz created_at
+    }
+
+    ITEMS {
+        UUID item_id PK
+        UUID group_id FK
+        string name
+        date expiration_date
+        string date_source "printed | suggested | estimated"
+        timestamptz added_at
+        timestamptz snoozed_until "nullable"
+    }
+
+    RESOLUTIONLOG {
+        UUID log_id PK
+        string item_name "snapshot, not FK"
+        string group_name "snapshot, not FK"
+        string resolution_type "consumed | discarded | deleted"
+        timestamptz resolved_at
+    }
 ```
+
+> Types are conceptual. SQLite stores dates/timestamps as ISO-8601 TEXT and UUIDs as TEXT. `date_source` and `resolution_type` are enforced via CHECK constraints, not separate tables.
+>
+> RESOLUTIONLOG intentionally has no relationships in this diagram. It is populated by copying `item_name` and `group_name` at resolution time (a snapshot, not a foreign key), so history survives edits and deletions in the live tables.
 
 ## Features Not in V1 MVP
 
@@ -185,3 +216,5 @@ After 2 weeks of daily use, I've logged ≥ 10 items and rescued ≥ 1 item I'd 
    - **TBD (Unresolved):** Needs research as of writing this note
 5. Can users delete a food group when items still exist in that food group?
    - **Resolved:** No. The user must move, consume, discard or delete each item in that food group before it can be deleted.
+6. Should ResolutionLog reference Items and FoodGroups with foreign keys, or copy their values as snapshots?
+   - **Resolved:** Snapshots. My first design gave ResolutionLog an item_id and group_id as FKs, but I hit a problem: the log's FKs would point at rows that won't exist. Resolving an item deletes it from Items, so log.item_id would reference a deleted row. Same issue with groups: if I rename or delete "Fridge" later, my history would point at a missing or misleading group. The fix is to copy item_name and group_name as plain text at resolution time, which takes advantage of a snapshot design. Logs are records of the past, and the past shouldn't change when the present does. This also means ResolutionLog has no relationship lines in the ER diagram. The data is copied by application code at the moment of the write, and after that the log row never touches the live tables again. That's behavior, not stored structure, so there's nothing for the diagram to draw.
