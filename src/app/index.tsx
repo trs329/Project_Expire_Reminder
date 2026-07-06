@@ -1,5 +1,5 @@
 import { FlatList, Text, View } from 'react-native';
-import { food_group_card_style, title_style } from '../app/styles.tsx';
+import { food_group_card_style, title_style } from '../app/styles';
 
 type FoodGroup = { id: string; name: string };
 
@@ -11,7 +11,7 @@ const GROUPS: FoodGroup[] = [
 
 export default function Index() {
   return (
-    <div>
+    <View style={{ flex: 1 }}>
       <View style={title_style.container}>
         <Text>My Kitchen</Text>
       </View>
@@ -24,6 +24,6 @@ export default function Index() {
           </View>
         )}
       />
-    </div>
+    </View>
   );
 }

@@ -5,6 +5,7 @@ export const title_style = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    color: 'red',
   },
 });
 
