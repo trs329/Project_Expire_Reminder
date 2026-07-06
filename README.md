@@ -54,3 +54,10 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Starting Fresh - What to Do
+
+1. Run `npx expo start` to start a development server.
+2. Edit src/app/index.tsx to edit the main screen.
+3. Put all your application code in /src, only screens and layout files should be in /src/app.
+4. Delete the /example directory when you're done referencing it.
