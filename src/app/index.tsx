@@ -1,4 +1,5 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
+import { food_group_card_style, title_style } from '../app/styles.tsx';
 
 type FoodGroup = { id: string; name: string };
 
@@ -11,22 +12,18 @@ const GROUPS: FoodGroup[] = [
 export default function Index() {
   return (
     <div>
-      <View style={styles.container}>
+      <View style={title_style.container}>
         <Text>My Kitchen</Text>
       </View>
       <FlatList
         data={GROUPS}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <Text>{item.name}</Text>}
+        renderItem={({ item }) => (
+          <View style={food_group_card_style.container}>
+            <Text>{item.name}</Text>
+          </View>
+        )}
       />
     </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
